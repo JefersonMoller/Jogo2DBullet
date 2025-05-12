@@ -75,7 +75,7 @@ void telaJogo() {
 
   // Inicializa jogo
   if (musicaNave == null) {
-    fundo = loadImage("FundoMundo.jpg");
+    fundo = loadImage("fundo.png");
     nave = loadImage("extra.png");
     laserImg = loadImage("laser_tiro.png");
     explosaoImg = safeLoadImage("explosao.png");
