@@ -6,6 +6,7 @@ import java.util.ArrayList;
 // ======== VARIÁVEIS GERAIS ========
 String nome = "";
 int telaAtual = 0; // 0 = Cadastro, 1 = Jogo
+boolean mute = false; // Global mute flag
 
 // ======== VARIÁVEIS DO JOGO ========
 SoundFile musicaNave;
@@ -28,6 +29,59 @@ void setup() {
   size(1200, 800);
   windowTitle("Cadastro e Jogo");
   fundoX2 = width;
+  
+  // Try to detect if we're on Linux and might have audio issues
+  String os = System.getProperty("os.name").toLowerCase();
+  mute = os.contains("linux"); // Auto-mute on Linux by default
+  
+  // Load sounds safely
+  musicaNave = safeLoadSound("assets/sounds/naveSonoro.MP3");
+  somTiro = safeLoadSound("assets/sounds/tiro_N1.MP3");
+  somExplosao = safeLoadSound("assets/sounds/explosao2.mp3");
+  
+  // Load images
+  fundo = safeLoadImage("assets/images/FundoMundo.jpg");
+  nave = safeLoadImage("assets/images/extra.png");
+  laserImg = safeLoadImage("assets/images/laser_tiro.png");
+  explosaoImg = safeLoadImage("assets/images/explosao.png");
+  meteoroImg = safeLoadImage("assets/images/meteoro.png");
+  
+  // Resize images if loaded successfully
+  if (nave != null) nave.resize(80, 80);
+  if (laserImg != null) laserImg.resize(200, 100);
+  if (meteoroImg != null) meteoroImg.resize(60, 60);
+  
+  // Initialize positions
+  naveX = width/2 - (nave != null ? nave.width/2 : 40);
+  naveY = height/2 - (nave != null ? nave.height/2 : 40);
+  fundoX2 = fundo != null ? fundo.width : width;
+  
+  // Start music if available and not muted
+  if (!mute && musicaNave != null) {
+    musicaNave.loop();
+  }
+}
+
+// Safe sound loading with error handling
+SoundFile safeLoadSound(String path) {
+  if (mute) return null;
+  
+  try {
+    return new SoundFile(this, path);
+  } catch (Exception e) {
+    println("Error loading sound: " + path + " - " + e.getMessage());
+    return null;
+  }
+}
+
+// Safe image loading with error handling
+PImage safeLoadImage(String path) {
+  try {
+    return loadImage(path);
+  } catch (Exception e) {
+    println("Error loading image: " + path + " - " + e.getMessage());
+    return null;
+  }
 }
 
 void draw() {
@@ -73,39 +127,17 @@ void telaJogo() {
     return;
   }
 
-  // Initialize the game
-  if (musicaNave == null) {
-    // Load images
-    fundo = loadImage("assets/images/FundoMundo.jpg");
-    nave = loadImage("assets/images/extra.png");
-    laserImg = loadImage("assets/images/laser_tiro.png");
-    explosaoImg = safeLoadImage("assets/images/explosao.png");
-    meteoroImg = safeLoadImage("assets/images/meteoro.png");
-    nave.resize(80, 80);
-    laserImg.resize(200, 100);
-    if (meteoroImg != null) meteoroImg.resize(60, 60);
-    
-    // Load sounds
-    try {
-      musicaNave = safeLoadSound("assets/sounds/naveSonoro.MP3");
-      somTiro = safeLoadSound("assets/sounds/tiro_N1.MP3");
-      somExplosao = safeLoadSound("assets/sounds/explosao2.mp3");
-      musicaNave.loop();
-    } catch (Exception e) {}
-    naveX = width/2 - nave.width/2;
-    naveY = height/2 - nave.height/2;
-    fundoX2 = fundo.width;
-  }
-
   background(0);
 
   // Movimento do fundo
   fundoX1 -= velocidadeFundo;
   fundoX2 -= velocidadeFundo;
-  image(fundo, fundoX1, 0);
-  image(fundo, fundoX2, 0);
-  if (fundoX1 < -fundo.width) fundoX1 = fundoX2 + fundo.width;
-  if (fundoX2 < -fundo.width) fundoX2 = fundoX1 + fundo.width;
+  if (fundo != null) {
+    image(fundo, fundoX1, 0);
+    image(fundo, fundoX2, 0);
+  }
+  if (fundoX1 < -(fundo != null ? fundo.width : width)) fundoX1 = fundoX2 + (fundo != null ? fundo.width : width);
+  if (fundoX2 < -(fundo != null ? fundo.width : width)) fundoX2 = fundoX1 + (fundo != null ? fundo.width : width);
 
   // Movimento nave
   if (keyPressed && key == CODED) {
@@ -115,9 +147,14 @@ void telaJogo() {
     if (keyCode == DOWN) naveY += velocidadeNave;
   }
 
-  naveX = constrain(naveX, 0, width - nave.width);
-  naveY = constrain(naveY, 0, height - nave.height);
-  image(nave, naveX, naveY);
+  naveX = constrain(naveX, 0, width - (nave != null ? nave.width : 80));
+  naveY = constrain(naveY, 0, height - (nave != null ? nave.height : 80));
+  if (nave != null) {
+    image(nave, naveX, naveY);
+  } else {
+    fill(0, 255, 0);
+    rect(naveX, naveY, 80, 80); // Fallback rectangle if ship image fails
+  }
 
   // Atualiza tiros
   for (int i = tiros.size() - 1; i >= 0; i--) {
@@ -135,9 +172,9 @@ void telaJogo() {
     m.mostrar();
 
     // Colisão nave
-    if (dist(m.x, m.y, naveX + nave.width/2, naveY + nave.height/2) < 40) {
+    if (dist(m.x, m.y, naveX + (nave != null ? nave.width/2 : 40), naveY + (nave != null ? nave.height/2 : 40)) < 40) {
       jogoAtivo = false;
-      if (somExplosao != null) somExplosao.play();
+      if (!mute && somExplosao != null) somExplosao.play();
       if (explosaoImg != null) image(explosaoImg, naveX, naveY);
       break;
     }
@@ -146,7 +183,7 @@ void telaJogo() {
     for (int j = tiros.size() - 1; j >= 0; j--) {
       Tiro t = tiros.get(j);
       if (dist(m.x, m.y, t.x, t.y) < 40) {
-        if (somExplosao != null) somExplosao.play();
+        if (!mute && somExplosao != null) somExplosao.play();
         if (explosaoImg != null) image(explosaoImg, m.x, m.y);
         meteoros.remove(i);
         tiros.remove(j);
@@ -187,15 +224,27 @@ void keyPressed() {
   } else {
     if (key == ' ' && jogoAtivo) {
       atirar();
+    } else if (key == 'm' || key == 'M') {
+      // Toggle mute with M key
+      mute = !mute;
+      if (musicaNave != null) {
+        if (mute) {
+          musicaNave.stop();
+        } else {
+          musicaNave.loop();
+        }
+      }
     }
   }
 }
 
 void atirar() {
-  if (somTiro.isPlaying()) somTiro.stop();
-  somTiro.play();
-  float tiroX = naveX + nave.width - 5;
-  float tiroY = naveY + nave.height - laserImg.height - 5;
+  if (!mute && somTiro != null) {
+    if (somTiro.isPlaying()) somTiro.stop();
+    somTiro.play();
+  }
+  float tiroX = naveX + (nave != null ? nave.width : 80) - 5;
+  float tiroY = naveY + (nave != null ? nave.height : 80) - (laserImg != null ? laserImg.height : 100) - 5;
   tiros.add(new Tiro(tiroX, tiroY, laserImg));
 }
 
@@ -212,7 +261,12 @@ class Tiro {
     x += velocidade;
   }
   void mostrar() {
-    image(img, x, y);
+    if (img != null) {
+      image(img, x, y);
+    } else {
+      fill(255, 0, 0);
+      rect(x, y, 20, 5); // Fallback rectangle if laser image fails
+    }
   }
 }
 
@@ -233,27 +287,7 @@ class Meteoro {
       image(meteoroImg, x, y);
     } else {
       fill(255, 100, 0);
-      ellipse(x, y, 40, 40);
+      ellipse(x, y, 40, 40); // Fallback ellipse if meteor image fails
     }
-  }
-}
-
-PImage safeLoadImage(String path) {
-  try {
-    return loadImage(path);
-  } catch (Exception e) {
-    println("Erro ao carregar imagem: " + path);
-    return null;
-  }
-}
-
-SoundFile safeLoadSound(String path) {
-  try {
-    return new SoundFile(this, path);
-  } catch (Exception e) {
-    println("Error loading sound: " + path);
-    println("Exception: " + e);
-    println("Running in silent mode");
-    return null;
   }
 }
