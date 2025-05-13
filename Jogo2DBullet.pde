@@ -73,20 +73,25 @@ void telaJogo() {
     return;
   }
 
-  // Inicializa jogo
+  // Initialize the game
   if (musicaNave == null) {
-    fundo = loadImage("fundo.png");
-    nave = loadImage("extra.png");
-    laserImg = loadImage("laser_tiro.png");
-    explosaoImg = safeLoadImage("explosao.png");
-    meteoroImg = safeLoadImage("meteoro.png");
+    // Load images
+    fundo = loadImage("assets/images/FundoMundo.jpg");
+    nave = loadImage("assets/images/extra.png");
+    laserImg = loadImage("assets/images/laser_tiro.png");
+    explosaoImg = safeLoadImage("assets/images/explosao.png");
+    meteoroImg = safeLoadImage("assets/images/meteoro.png");
     nave.resize(80, 80);
     laserImg.resize(200, 100);
     if (meteoroImg != null) meteoroImg.resize(60, 60);
-    musicaNave = new SoundFile(this, "naveSonoro.MP3");
-    somTiro = new SoundFile(this, "tiro_N1.MP3");
-    somExplosao = safeLoadSound("explosao2.mp3");
-    musicaNave.loop();
+    
+    // Load sounds
+    try {
+      musicaNave = safeLoadSound("assets/sounds/naveSonoro.MP3");
+      somTiro = safeLoadSound("assets/sounds/tiro_N1.MP3");
+      somExplosao = safeLoadSound("assets/sounds/explosao2.mp3");
+      musicaNave.loop();
+    } catch (Exception e) {}
     naveX = width/2 - nave.width/2;
     naveY = height/2 - nave.height/2;
     fundoX2 = fundo.width;
@@ -246,7 +251,9 @@ SoundFile safeLoadSound(String path) {
   try {
     return new SoundFile(this, path);
   } catch (Exception e) {
-    println("Erro ao carregar som: " + path);
+    println("Error loading sound: " + path);
+    println("Exception: " + e);
+    println("Running in silent mode");
     return null;
   }
 }
