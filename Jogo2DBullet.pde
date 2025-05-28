@@ -136,7 +136,7 @@ void telaJogo() {
     fill(255);
     textSize(30);
     for(int i = 0; i < min(3, listaRanking.size()); i++) {
-      text("Ranking " + (i + 1) + ": " + listaRanking.get(i), width/2, (height/2) + 80 + (i * 40));
+      text("Ranking " + (i + 1) + ": " + listaRanking.get(i), width/2, (height/2) + 80 + (i * 60));
     }
 
     fill(255);
