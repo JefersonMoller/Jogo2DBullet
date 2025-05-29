@@ -1,4 +1,4 @@
-import processing.sound.*;
+import processing.sound.*; //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
 import javax.swing.JOptionPane;
 import java.io.*;
 import java.util.ArrayList;
@@ -10,7 +10,10 @@ int pontuacaoJogador = 0;
 int telaAtual = 0; // 0 = Cadastro, 1 = Jogo
 int tempoInicial;
 float multiplicaVeloc = 1.0;
-int[] pontuacaoAcumulada = new int[5]; //para Score
+int[] pontuacaoAcumulada2 = new int[5]; //para Score
+// troca
+ArrayList<Integer> pontuacaoAcumulada = new ArrayList<Integer>();
+
 int jogadaAtual = 0;
 
 SoundFile musicaNave;
@@ -76,8 +79,8 @@ void telaCadastro() {
   rect(width/2 - 100, 50, 200, 40);
 
   fill(10, 10, 10);
-  textAlign(LEFT, CENTER);
-  text(nome, width/2 - 90, 70);
+  textAlign(CENTER, CENTER);//NOME CENTRALIZADO - NAO TEM LIMITE E ESTÁ PASSANDO DA CAIXA
+  text(nome, width/2, 70);//NOME CENTRALIZADO - NAO TEM LIMITE E ESTÁ PASSANDO DA CAIXA
 
   fill(15, 245, 58);
   rect(width/2 - 50, 100, 100, 40);
@@ -104,43 +107,45 @@ void telaJogo() {
     fill(5, 149, 22);
     textSize(50);
     
+    /*
 
-    if (jogadaAtual < pontuacaoAcumulada.length) {
-      pontuacaoAcumulada[jogadaAtual] = pontuacaoJogador;
+    if (jogadaAtual < pontuacaoAcumulada2.length) {
+      pontuacaoAcumulada2[jogadaAtual] = pontuacaoJogador;
       jogadaAtual++;
     }
-    
-    //JOgador e pontuação
-    text("O jogador "+nome+"\nteve a pontuação de "+pontuacaoJogador, width/2, height/2);
-    
+  
+    //pontuacaoAcumulada.add(pontuacaoJogador);
     
     /* for para controlar ranking
     for(int i=0;i<pontuacaoAcumulada.length;i++){
       text("Ranking 1: "+pontuacaoAcumulada[0], width/2, (height/2)+50);
       text("Ranking 2: "+pontuacaoAcumulada[1], width/2, (height/2)+90);
       text("Ranking 3: "+pontuacaoAcumulada[2], width/2, (height/2)+120);
-    }*/
+    }
     
     
     ArrayList<Integer> listaRanking = new ArrayList<Integer>();
     
-    for(int i=0;i<pontuacaoAcumulada.length;i++){
-      if(pontuacaoAcumulada[i]>0){
-        listaRanking.add(pontuacaoAcumulada[i]);  
+    for (int i = 0; i < pontuacaoAcumulada2.length; i++) {
+      if (pontuacaoAcumulada2[i] > 0) {
+        listaRanking.add(pontuacaoAcumulada2[i]);
       }
     }
 
-   Collections.sort(listaRanking, Collections.reverseOrder());
-    
+    Collections.sort(listaRanking, Collections.reverseOrder()); //<>// //<>// //<>//
+     //<>//
     
     fill(255);
     textSize(30);
-    for(int i = 0; i < min(3, listaRanking.size()); i++) {
-      text("Ranking " + (i + 1) + ": " + listaRanking.get(i), width/2, (height/2) + 80 + (i * 60));
-    }
+    for(int i = 0; i < min(3, listaRanking.size()); i++) { //<>//
+      text("Ranking " + (i + 1) + ": " + listaRanking.get(i), width/2, (height/2) + 80 + (i * 60)); //<>//
+    }*/
+    
+    //JOgador e pontuação
+    text("O jogador "+nome+"\nteve a pontuação de "+pontuacaoJogador, width/2, height/2);
 
     fill(255);
-    textSize(25);
+    textSize(30);
     text("Pressione enter para restart",width/2, height/2 + 300);
     return;
   }
@@ -170,7 +175,7 @@ void telaJogo() {
 
   int tempoDecorrido = millis() - tempoInicial;
   int minutosPassados = tempoDecorrido / 60000;
-  multiplicaVeloc = 1.0 + minutosPassados * 0.5;
+  multiplicaVeloc = 1.0 + minutosPassados * 0.9; // ajuste de velocidade e progresso do jogo
 
   background(0);
   fundoX1 -= velocidadeFundo;
@@ -190,8 +195,8 @@ void telaJogo() {
   naveX = constrain(naveX, 0, width - nave.width);
   naveY = constrain(naveY, 0, height - nave.height);
 
-  // Imunidade de 30 segundos
-  if (imune && millis() - tempoImunidade > 30000) {
+  //Imunidade com estrela por 10 segndos
+  if (imune && millis() - tempoImunidade > 10000) {
     imune = false;
   }
 
@@ -256,10 +261,10 @@ void mousePressed() {
   if (telaAtual == 0) {
     if (mouseX >= width/2 - 50 && mouseX <= width/2 + 50 &&
         mouseY >= 100 && mouseY <= 140) {
-      if (nome.length() > 0) {
+      if (nome.length() > 0 && nome.length() <=15) {
         telaAtual = 1;
       } else {
-        JOptionPane.showMessageDialog(null, "Jogador não cadastrado! Você deve cadastrar um jogador!", "Alerta", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, "Seu cadastro não foi preenchido ou passou do limite de 15 caracteres!", "Alerta", JOptionPane.INFORMATION_MESSAGE);
       }
     }
   } else {
@@ -285,6 +290,7 @@ void keyPressed() {
       restart();
     }
   }
+
 }
 
 void restart() {
