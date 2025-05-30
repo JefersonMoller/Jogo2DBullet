@@ -20,7 +20,7 @@ SoundFile somTiro;
 SoundFile somExplosao;
 
 PFont minhaFOnte, fontePadrao;
-PImage fundo, nave, laserImg, explosaoImg, meteoroImg, gameOver, estrelaImg;
+PImage fundo_cadastro,fundo, fundo2,fundo3, nave, laserImg, explosaoImg, meteoroImg, gameOver, estrelaImg, fundoAtual;//fundo atual para trocar de fundo ou fase
 float naveX, naveY;
 float velocidadeNave = 5;
 float fundoX1 = 0;
@@ -43,7 +43,13 @@ void setup() {
   size(1200, 800);
   windowTitle("Cadastre seu jogador");
   fundoX2 = width;
-  fundo = loadImage("apresentacao2.png");
+
+  //telas para troca de fundo do jogo
+  fundo = loadImage("fundo.png");
+  fundo2 = loadImage("fundo2.png");
+  fundo3 = loadImage("fundo3.png");
+
+  fundo_cadastro = loadImage("apresentacao2.png");
   gameOver = loadImage("gameOverSangrento.png");
   estrelaImg = loadImage("estrela.gif");
   estrelaImg.resize(80, 80); //tamanho da estrela bonus
@@ -65,7 +71,7 @@ void draw() {
 }
 
 void telaCadastro() {
-  image(fundo, 0, 0, width, height);
+  image(fundo_cadastro, 0, 0, width, height);
 
   textSize(20);
   fill(255);
@@ -89,6 +95,17 @@ void telaCadastro() {
 }
 
 void telaJogo() {
+
+  int tempoFundo = millis()/1000;
+
+  if(tempoFundo < 60){
+    fundoAtual = fundo;
+  }else if(tempoFundo<120){
+    fundoAtual = fundo2;
+  }else{
+    fundoAtual = fundo3;
+  }
+
   if (!jogoAtivo) {
     background(0);
     if (gameOver != null) {
@@ -116,7 +133,6 @@ void telaJogo() {
   }
 
   if (musicaNave == null) {
-    fundo = loadImage("fundo.png");
     nave = loadImage("extra.png");
     laserImg = loadImage("laser_tiro.png");
     explosaoImg = loadImage("explosao.png");
@@ -132,7 +148,7 @@ void telaJogo() {
 
     naveX = width/2 - nave.width/2;
     naveY = height/2 - nave.height/2;
-    fundoX2 = fundo.width;
+    fundoX2 = fundoAtual.width;
 
     tempoInicial = millis();
     tempoUltimaEstrela = millis();
@@ -145,8 +161,8 @@ void telaJogo() {
   background(0);
   fundoX1 -= velocidadeFundo;
   fundoX2 -= velocidadeFundo;
-  image(fundo, fundoX1, 0);
-  image(fundo, fundoX2, 0);
+  image(fundoAtual, fundoX1, 0);
+  image(fundoAtual, fundoX2, 0);
   if (fundoX1 < -fundo.width) fundoX1 = fundoX2 + fundo.width;
   if (fundoX2 < -fundo.width) fundoX2 = fundoX1 + fundo.width;
 
