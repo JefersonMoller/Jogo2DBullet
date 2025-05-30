@@ -150,11 +150,21 @@ void telaJogo() {
   if (fundoX1 < -fundo.width) fundoX1 = fundoX2 + fundo.width;
   if (fundoX2 < -fundo.width) fundoX2 = fundoX1 + fundo.width;
 
+
+  //controle da nave com direcionais
   if (keyPressed && key == CODED) {
     if (keyCode == LEFT) naveX -= velocidadeNave;
     if (keyCode == RIGHT) naveX += velocidadeNave;
     if (keyCode == UP) naveY -= velocidadeNave;
     if (keyCode == DOWN) naveY += velocidadeNave;
+  }
+
+  //controle da nave com A,S,D,W
+  if (keyPressed) {
+    if(key == 'a' || key == 'A') naveX -= velocidadeNave;
+    if(key == 'd' || key == 'D') naveX += velocidadeNave;
+    if(key == 'w' || key == 'W') naveY -= velocidadeNave;
+    if(key == 's' || key == 'S') naveY += velocidadeNave;
   }
 
   naveX = constrain(naveX, 0, width - nave.width);
