@@ -96,7 +96,7 @@ void telaCadastro() {
 
 void telaJogo() {
 
-  int tempoFundo = millis()/1000;
+  int tempoFundo = (millis() - tempoInicial) / 1000;
 
   if(tempoFundo < 60){
     fundoAtual = fundo;
