@@ -4,13 +4,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
-
 String nome = "";
 int pontuacaoJogador = 0;
 int telaAtual = 0; // 0 = Cadastro, 1 = Jogo
 int tempoInicial;
 float multiplicaVeloc = 1.0;
-int[] pontuacaoAcumulada2 = new int[5]; //para Score
+//int[] pontuacaoAcumulada2 = new int[5]; //para Score
 // troca
 ArrayList<Integer> pontuacaoAcumulada = new ArrayList<Integer>();
 
@@ -42,7 +41,7 @@ Estrela estrelaPoder; // Objeto da classe Estrela
 
 void setup() {
   size(1200, 800);
-  windowTitle("Cadastro e Jogo");
+  windowTitle("Cadastre seu jogador");
   fundoX2 = width;
   fundo = loadImage("apresentacao2.png");
   gameOver = loadImage("gameOverSangrento.png");
@@ -100,47 +99,13 @@ void telaJogo() {
 
     fill(255, 0, 0);
     textFont(minhaFOnte);
-    textSize(50);
-    text("GAME OVER", width/2, (height/2)+100);
+    textSize(65);
+    text("GAME OVER", width/2, (height/2)-100);
 
     textFont(fontePadrao);
     fill(5, 149, 22);
     textSize(50);
-    
-    /*
-
-    if (jogadaAtual < pontuacaoAcumulada2.length) {
-      pontuacaoAcumulada2[jogadaAtual] = pontuacaoJogador;
-      jogadaAtual++;
-    }
-  
-    //pontuacaoAcumulada.add(pontuacaoJogador);
-    
-    /* for para controlar ranking
-    for(int i=0;i<pontuacaoAcumulada.length;i++){
-      text("Ranking 1: "+pontuacaoAcumulada[0], width/2, (height/2)+50);
-      text("Ranking 2: "+pontuacaoAcumulada[1], width/2, (height/2)+90);
-      text("Ranking 3: "+pontuacaoAcumulada[2], width/2, (height/2)+120);
-    }
-    
-    
-    ArrayList<Integer> listaRanking = new ArrayList<Integer>();
-    
-    for (int i = 0; i < pontuacaoAcumulada2.length; i++) {
-      if (pontuacaoAcumulada2[i] > 0) {
-        listaRanking.add(pontuacaoAcumulada2[i]);
-      }
-    }
-
-    Collections.sort(listaRanking, Collections.reverseOrder()); //<>// //<>// //<>//
-     //<>//
-    
-    fill(255);
-    textSize(30);
-    for(int i = 0; i < min(3, listaRanking.size()); i++) { //<>//
-      text("Ranking " + (i + 1) + ": " + listaRanking.get(i), width/2, (height/2) + 80 + (i * 60)); //<>//
-    }*/
-    
+     
     //JOgador e pontuação
     text("O jogador "+nome+"\nteve a pontuação de "+pontuacaoJogador, width/2, height/2);
 
@@ -378,7 +343,6 @@ class Estrela {
     }
 
     // Verifica colisão com a nave
-    // Ajustei o cálculo da distância para considerar o centro da imagem da estrela
     if (ativa && dist(naveX + nave.width/2, naveY + nave.height/2, x + estrelaImg.width/2, y + estrelaImg.height/2) < 40) {
       imune = true;
       tempoImunidade = millis();
