@@ -1,4 +1,4 @@
-import processing.sound.*; //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+import processing.sound.*;
 import javax.swing.JOptionPane;
 import java.io.*;
 import java.util.ArrayList;
@@ -9,8 +9,6 @@ int pontuacaoJogador = 0;
 int telaAtual = 0; // 0 = Cadastro, 1 = Jogo
 int tempoInicial;
 float multiplicaVeloc = 1.0;
-//int[] pontuacaoAcumulada2 = new int[5]; //para Score
-// troca
 ArrayList<Integer> pontuacaoAcumulada = new ArrayList<Integer>();
 
 int jogadaAtual = 0;
@@ -20,7 +18,7 @@ SoundFile somTiro;
 SoundFile somExplosao;
 
 PFont minhaFOnte, fontePadrao;
-PImage fundo_cadastro,fundo, fundo2,fundo3, nave, laserImg, explosaoImg, meteoroImg, gameOver, estrelaImg, fundoAtual;//fundo atual para trocar de fundo ou fase
+PImage fundo_cadastro,fundo, fundo2,fundo3, nave, laserImg, explosaoImg, meteoroImg, meteoroImg2, gameOver, estrelaImg, fundoAtual; // Corrigido: meteoroImg2
 float naveX, naveY;
 float velocidadeNave = 5;
 float fundoX1 = 0;
@@ -44,11 +42,11 @@ void setup() {
   windowTitle("Cadastre seu jogador");
   fundoX2 = width;
 
-  //telas para troca de fundo do jogo
+  // Telas para troca de fundo do jogo
   fundo = loadImage("fundo.png");
   fundo2 = loadImage("fundo2.jpg");
   fundo3 = loadImage("fundo3.jpg");
-
+  
   fundo_cadastro = loadImage("apresentacao2.png");
   gameOver = loadImage("gameOverSangrento.png");
   estrelaImg = loadImage("estrela.gif");
@@ -60,6 +58,20 @@ void setup() {
   if (gameOver != null) {
     gameOver.resize(1200, 800);
   }
+
+  nave = loadImage("extra.png");
+  laserImg = loadImage("laser_tiro.png");
+  explosaoImg = loadImage("explosao.png");
+  
+  // Carregue AMBAS as imagens do meteoro
+  meteoroImg = loadImage("meteoro.png");
+  meteoroImg2 = loadImage("meteoro_2.png");
+  
+  nave.resize(80, 80);
+  laserImg.resize(200, 100);
+  
+  if (meteoroImg != null) meteoroImg.resize(60, 60);
+  if (meteoroImg2 != null) meteoroImg2.resize(130,130);
 }
 
 void draw() {
@@ -84,8 +96,8 @@ void telaCadastro() {
   rect(width/2 - 100, 50, 200, 40);
 
   fill(10, 10, 10);
-  textAlign(CENTER, CENTER);//NOME CENTRALIZADO - NAO TEM LIMITE E ESTÁ PASSANDO DA CAIXA
-  text(nome, width/2, 70);//NOME CENTRALIZADO - NAO TEM LIMITE E ESTÁ PASSANDO DA CAIXA
+  textAlign(CENTER, CENTER);
+  text(nome, width/2, 70);
 
   fill(15, 245, 58);
   rect(width/2 - 50, 100, 100, 40);
@@ -98,7 +110,7 @@ void telaJogo() {
 
   int tempoFundo = (millis() - tempoInicial) / 1000;
 
-  if(tempoFundo < 90){//1 minuto e meio troca fica nesse cenário
+  if(tempoFundo < 90){
     fundoAtual = fundo;
   }else if(tempoFundo<180){
     fundoAtual = fundo2;
@@ -122,7 +134,7 @@ void telaJogo() {
     textFont(fontePadrao);
     fill(5, 149, 22);
     textSize(50);
-     
+      
     //JOgador e pontuação
     text("O jogador "+nome+"\nteve a pontuação de "+pontuacaoJogador, width/2, height/2);
 
@@ -133,14 +145,6 @@ void telaJogo() {
   }
 
   if (musicaNave == null) {
-    nave = loadImage("extra.png");
-    laserImg = loadImage("laser_tiro.png");
-    explosaoImg = loadImage("explosao.png");
-    meteoroImg = loadImage("meteoro.png");
-    nave.resize(80, 80);
-    laserImg.resize(200, 100);
-    if (meteoroImg != null) meteoroImg.resize(60, 60);
-
     musicaNave = new SoundFile(this, "naveSonoro.MP3");
     somTiro = new SoundFile(this, "tiro_N1.MP3");
     somExplosao = new SoundFile(this, "explosao2.mp3");
@@ -148,7 +152,6 @@ void telaJogo() {
 
     naveX = width/2 - nave.width/2;
     naveY = height/2 - nave.height/2;
-    fundoX2 = fundoAtual.width;
 
     tempoInicial = millis();
     tempoUltimaEstrela = millis();
@@ -280,7 +283,6 @@ void keyPressed() {
       restart();
     }
   }
-
 }
 
 void restart() {
@@ -312,7 +314,7 @@ void atirar() {
 
 class Tiro {
   float x, y;
-  float velocidade = 15; //  controla velocidade do tiro - deve aumentar a cada ciclo de aumento de velocidade
+  float velocidade = 15; //controla velocidade do tiro - deve aumentar a cada ciclo de aumento de velocidade
   PImage img;
   Tiro(float x, float y, PImage img) {
     this.x = x;
@@ -331,19 +333,30 @@ class Meteoro {
   float x, y;
   float velocidadeX;
   float velocidadeY;
+  
+  PImage imagemAtualDoMeteoro; //Variável para armazenar a imagem específica deste meteoro
+
   Meteoro(float multiplicador) {
     x = width + 50;
     y = random(0, height - 60);
     velocidadeX = random(3, 6) * multiplicador;
     velocidadeY = random(-1, 1);
+    
+    if (random(1) < 0.5) {
+      this.imagemAtualDoMeteoro = meteoroImg; 
+    } else {
+      this.imagemAtualDoMeteoro = meteoroImg2;
+    }
   }
+
   void atualizar() {
     x -= velocidadeX;
     y += velocidadeY;
     y = constrain(y, 0, height - 60);
   }
+
   void mostrar() {
-    image(meteoroImg, x, y);
+    image(imagemAtualDoMeteoro, x, y); 
   }
 }
 
