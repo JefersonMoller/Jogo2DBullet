@@ -46,8 +46,8 @@ void setup() {
 
   //telas para troca de fundo do jogo
   fundo = loadImage("fundo.png");
-  fundo2 = loadImage("fundo2.png");
-  fundo3 = loadImage("fundo3.png");
+  fundo2 = loadImage("fundo2.jpg");
+  fundo3 = loadImage("fundo3.jpg");
 
   fundo_cadastro = loadImage("apresentacao2.png");
   gameOver = loadImage("gameOverSangrento.png");
@@ -98,9 +98,9 @@ void telaJogo() {
 
   int tempoFundo = (millis() - tempoInicial) / 1000;
 
-  if(tempoFundo < 60){
+  if(tempoFundo < 90){//1 minuto e meio troca fica nesse cenário
     fundoAtual = fundo;
-  }else if(tempoFundo<120){
+  }else if(tempoFundo<180){
     fundoAtual = fundo2;
   }else{
     fundoAtual = fundo3;
@@ -165,7 +165,6 @@ void telaJogo() {
   image(fundoAtual, fundoX2, 0);
   if (fundoX1 < -fundo.width) fundoX1 = fundoX2 + fundo.width;
   if (fundoX2 < -fundo.width) fundoX2 = fundoX1 + fundo.width;
-
 
   //controle da nave com direcionais
   if (keyPressed && key == CODED) {
