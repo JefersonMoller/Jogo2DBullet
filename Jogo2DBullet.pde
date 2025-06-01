@@ -18,7 +18,7 @@ SoundFile somTiro;
 SoundFile somExplosao;
 
 PFont minhaFOnte, fontePadrao;
-PImage fundo_cadastro,fundo, fundo2,fundo3, nave, laserImg, explosaoImg, meteoroImg, meteoroImg2, gameOver, estrelaImg, fundoAtual; // Corrigido: meteoroImg2
+PImage fundo_cadastro, fundo, fundo2, fundo3, fundo4,nave, laserImg, explosaoImg, meteoroImg, meteoroImg2, poderFogo, gameOver, estrelaImg, fundoAtual; // Corrigido: meteoroImg2
 float naveX, naveY;
 float velocidadeNave = 5;
 float fundoX1 = 0;
@@ -46,8 +46,10 @@ void setup() {
   fundo = loadImage("fundo.png");
   fundo2 = loadImage("fundo2.jpg");
   fundo3 = loadImage("fundo3.jpg");
-  
-  fundo_cadastro = loadImage("apresentacao2.png");
+  //fundo4 = loadImage("bosque.jpg");
+  fundo4 = loadImage("bosque2.png");
+
+  fundo_cadastro = loadImage("apresentacao3.png");
   gameOver = loadImage("gameOverSangrento.png");
   estrelaImg = loadImage("estrela.gif");
   estrelaImg.resize(80, 80); //tamanho da estrela bonus
@@ -62,16 +64,18 @@ void setup() {
   nave = loadImage("extra.png");
   laserImg = loadImage("laser_tiro.png");
   explosaoImg = loadImage("explosao.png");
-  
-  // Carregue AMBAS as imagens do meteoro
+
+  //tipos de inimigos - meteoros ou poder do fogo
   meteoroImg = loadImage("meteoro.png");
   meteoroImg2 = loadImage("meteoro_2.png");
-  
+  poderFogo = loadImage("poderFogo.png");
+
   nave.resize(80, 80);
-  laserImg.resize(200, 100);
-  
+  laserImg.resize(200, 50); // Redimensionado para ficar mais próximo do centro da nave
+
   if (meteoroImg != null) meteoroImg.resize(60, 60);
-  if (meteoroImg2 != null) meteoroImg2.resize(130,130);
+  if (meteoroImg2 != null) meteoroImg2.resize(130, 130);
+  if (poderFogo != null) poderFogo.resize(130, 130);
 }
 
 void draw() {
@@ -110,12 +114,16 @@ void telaJogo() {
 
   int tempoFundo = (millis() - tempoInicial) / 1000;
 
-  if(tempoFundo < 90){
-    fundoAtual = fundo;
-  }else if(tempoFundo<180){
+
+  //neste bloco, alterna a imagem de fundo com o passar do tempo
+  if (tempoFundo < 90) { // troca do primeiro fundo em 1min e 30s
+    fundoAtual = fundo4;
+  } else if (tempoFundo < 180) {// 3min
     fundoAtual = fundo2;
-  }else{
+  } else if (tempoFundo < 240){
     fundoAtual = fundo3;
+  }else{
+    fundoAtual = fundo;
   }
 
   if (!jogoAtivo) {
@@ -129,18 +137,18 @@ void telaJogo() {
     fill(255, 0, 0);
     textFont(minhaFOnte);
     textSize(65);
-    text("GAME OVER", width/2, (height/2)-100);
+    text("GAME OVER", (width/2)-210, (height/2)-100);
 
     textFont(fontePadrao);
     fill(5, 149, 22);
     textSize(50);
-      
+
     //JOgador e pontuação
-    text("O jogador "+nome+"\nteve a pontuação de "+pontuacaoJogador, width/2, height/2);
+    text("O jogador " + nome + "\nteve a pontuação de " + pontuacaoJogador, (width/2)-210, height/2);
 
     fill(255);
     textSize(30);
-    text("Pressione enter para restart",width/2, height/2 + 300);
+    text("Pressione enter para restart", width/2, height/2 + 300);
     return;
   }
 
@@ -166,8 +174,8 @@ void telaJogo() {
   fundoX2 -= velocidadeFundo;
   image(fundoAtual, fundoX1, 0);
   image(fundoAtual, fundoX2, 0);
-  if (fundoX1 < -fundo.width) fundoX1 = fundoX2 + fundo.width;
-  if (fundoX2 < -fundo.width) fundoX2 = fundoX1 + fundo.width;
+  if (fundoX1 < -fundoAtual.width) fundoX1 = fundoX2 + fundoAtual.width;
+  if (fundoX2 < -fundoAtual.width) fundoX2 = fundoX1 + fundoAtual.width;
 
   //controle da nave com direcionais
   if (keyPressed && key == CODED) {
@@ -179,10 +187,10 @@ void telaJogo() {
 
   //controle da nave com A,S,D,W
   if (keyPressed) {
-    if(key == 'a' || key == 'A') naveX -= velocidadeNave;
-    if(key == 'd' || key == 'D') naveX += velocidadeNave;
-    if(key == 'w' || key == 'W') naveY -= velocidadeNave;
-    if(key == 's' || key == 'S') naveY += velocidadeNave;
+    if (key == 'a' || key == 'A') naveX -= velocidadeNave;
+    if (key == 'd' || key == 'D') naveX += velocidadeNave;
+    if (key == 'w' || key == 'W') naveY -= velocidadeNave;
+    if (key == 's' || key == 'S') naveY += velocidadeNave;
   }
 
   naveX = constrain(naveX, 0, width - nave.width);
@@ -207,18 +215,28 @@ void telaJogo() {
     m.atualizar();
     m.mostrar();
 
-    if (!imune && dist(m.x, m.y, naveX + nave.width/2, naveY + nave.height/2) < 40) {
+    // Verificação de colisão da nave com o meteoro
+    if (!imune && dist(m.x + m.imagemAtualDoMeteoro.width/2, m.y + m.imagemAtualDoMeteoro.height/2, naveX + nave.width/2, naveY + nave.height/2) < (nave.width/2 + m.imagemAtualDoMeteoro.width/2) * 0.7) {
       jogoAtivo = false;
       if (somExplosao != null) somExplosao.play();
-      if (explosaoImg != null) image(explosaoImg, naveX, naveY);
+      if (explosaoImg != null) {
+        imageMode(CENTER);
+        image(explosaoImg, naveX + nave.width/2, naveY + nave.height/2);
+        imageMode(CORNER);
+      }
       break;
     }
 
+    // Verificação de colisão do tiro com o meteoro
     for (int j = tiros.size() - 1; j >= 0; j--) {
       Tiro t = tiros.get(j);
-      if (dist(m.x, m.y, t.x, t.y) < 40) {
+      if (dist(m.x + m.imagemAtualDoMeteoro.width/2, m.y + m.imagemAtualDoMeteoro.height/2, t.x + t.img.width/2, t.y + t.img.height/2) < (m.imagemAtualDoMeteoro.width/2 + t.img.width/2) * 0.7) {
         if (somExplosao != null) somExplosao.play();
-        if (explosaoImg != null) image(explosaoImg, m.x, m.y);
+        if (explosaoImg != null) {
+          imageMode(CENTER);
+          image(explosaoImg, m.x + m.imagemAtualDoMeteoro.width/2, m.y + m.imagemAtualDoMeteoro.height/2);
+          imageMode(CORNER);
+        }
         meteoros.remove(i);
         tiros.remove(j);
         pontuacaoJogador += 1;
@@ -226,7 +244,7 @@ void telaJogo() {
       }
     }
 
-    if (m.x < -50) meteoros.remove(i);
+    if (m.x < -150) meteoros.remove(i); // Remove meteoros que saem da tela
   }
 
   for (int i = tiros.size() - 1; i >= 0; i--) {
@@ -248,13 +266,22 @@ void telaJogo() {
     estrelaPoder.atualizar();
     estrelaPoder.mostrar();
   }
+
+  // Exibir pontuação
+  fill(255);
+  textSize(24);
+  textAlign(LEFT, TOP);
+  text("Pontuação: " + pontuacaoJogador, 10, 10);
+  text("Tempo: " + tempoFundo + "s", 10, 40);
+  text("Velocidade: " + String.format("%.1f", multiplicaVeloc) + "x", 10, 70);
+  text("Imunidade: " + (imune ? "ATIVADA" : "DESATIVADA"), 10, 100);
 }
 
 void mousePressed() {
   if (telaAtual == 0) {
     if (mouseX >= width/2 - 50 && mouseX <= width/2 + 50 &&
-        mouseY >= 100 && mouseY <= 140) {
-      if (nome.length() > 0 && nome.length() <=15) {
+      mouseY >= 100 && mouseY <= 140) {
+      if (nome.length() > 0 && nome.length() <= 15) {
         telaAtual = 1;
       } else {
         JOptionPane.showMessageDialog(null, "Seu cadastro não foi preenchido ou passou do limite de 15 caracteres!", "Alerta", JOptionPane.INFORMATION_MESSAGE);
@@ -271,7 +298,7 @@ void keyPressed() {
   if (telaAtual == 0) {
     if (key == BACKSPACE && nome.length() > 0) {
       nome = nome.substring(0, nome.length() - 1);
-    } else if (key != CODED && nome.length() < 20 && key != ENTER && key != RETURN) {
+    } else if (key != CODED && nome.length() < 15 && key != ENTER && key != RETURN) { // Limite de 15 caracteres
       nome += key;
     }
   } else {
@@ -295,10 +322,10 @@ void restart() {
   multiplicaVeloc = 1.0;
   tempoInicial = millis();
   imune = false;
-  
+
   estrelaPoder = null; // Garante que a estrela seja resetada
   tempoUltimaEstrela = millis(); // Reseta o contador para a próxima estrela
-  
+
   if (musicaNave != null && !musicaNave.isPlaying()) {
     musicaNave.loop();
   }
@@ -307,8 +334,9 @@ void restart() {
 void atirar() {
   if (somTiro != null && somTiro.isPlaying()) somTiro.stop();
   if (somTiro != null) somTiro.play();
-  float tiroX = naveX + nave.width - 5;
-  float tiroY = naveY + nave.height - laserImg.height - 5;
+  // Ajuste a posição Y do tiro para que ele saia mais centralizado na nave
+  float tiroX = naveX + nave.width;
+  float tiroY = naveY + nave.height / 2 - laserImg.height / 2;
   tiros.add(new Tiro(tiroX, tiroY, laserImg));
 }
 
@@ -333,30 +361,35 @@ class Meteoro {
   float x, y;
   float velocidadeX;
   float velocidadeY;
-  
-  PImage imagemAtualDoMeteoro; //Variável para armazenar a imagem específica deste meteoro
+  PImage imagemAtualDoMeteoro; // Variável para armazenar a imagem específica deste meteoro
+  int tipo; // Adicionado: variável 'tipo' para determinar o tipo de meteoro
 
   Meteoro(float multiplicador) {
     x = width + 50;
     y = random(0, height - 60);
     velocidadeX = random(3, 6) * multiplicador;
     velocidadeY = random(-1, 1);
-    
-    if (random(1) < 0.5) {
-      this.imagemAtualDoMeteoro = meteoroImg; 
-    } else {
+
+    // Atribui um tipo aleatoriamente
+    tipo = (int) random(3); // 0, 1 ou 2
+
+    if (tipo == 0) {
+      this.imagemAtualDoMeteoro = meteoroImg;
+    } else if (tipo == 1) {
       this.imagemAtualDoMeteoro = meteoroImg2;
+    } else { // tipo == 2
+      this.imagemAtualDoMeteoro = poderFogo;
     }
   }
 
   void atualizar() {
     x -= velocidadeX;
     y += velocidadeY;
-    y = constrain(y, 0, height - 60);
+    y = constrain(y, 0, height - imagemAtualDoMeteoro.height); // Garante que o meteoro não saia da tela verticalmente
   }
 
   void mostrar() {
-    image(imagemAtualDoMeteoro, x, y); 
+    image(imagemAtualDoMeteoro, x, y);
   }
 }
 
@@ -381,7 +414,8 @@ class Estrela {
     }
 
     // Verifica colisão com a nave
-    if (ativa && dist(naveX + nave.width/2, naveY + nave.height/2, x + estrelaImg.width/2, y + estrelaImg.height/2) < 40) {
+    // Ajustado o cálculo de distância para considerar o centro das imagens
+    if (ativa && dist(naveX + nave.width/2, naveY + nave.height/2, x + estrelaImg.width/2, y + estrelaImg.height/2) < (nave.width/2 + estrelaImg.width/2) * 0.7) { // Multiplicador para ajuste de colisão
       imune = true;
       tempoImunidade = millis();
       ativa = false; // Desativa a estrela após ser coletada
